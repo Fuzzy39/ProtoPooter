@@ -1,0 +1,47 @@
+# Say Hi
+# A test to show the computer actually works and can do something non-trivial.
+
+# Append this after the language definition file in VCB.
+
+bookmark Code
+
+# interrupt vector
+word interrupt
+
+origin 0x0003 # program code starts at 0x0003.
+
+
+@ start
+# address to write to (minus a row)
+MOV16 imm CD; word 0x00E1 #(0x0101 - 0x20)
+
+@ loop
+# send CD to the next row
+ADD16 CD imm CD; word 0x0020
+
+# calculate the address to pull data from
+MOV16 imm AB; word data_end
+SUB16 AB immp AB; word data_counter
+
+# decrement the counter by two bytes
+SUB16 immp imm immp; word data_counter; word 0x0002 ; word data_counter
+
+# copy the data
+MOV16 ABp CDp
+
+JMP fnZ imm; word loop
+HLT
+
+@ interrupt
+HLT
+
+@ data_counter
+word 0x000A
+@ data
+0xCC; 0xFC
+0xCC; 0x30
+0xFC; 0x30
+0xCC; 0x30
+0xCC; 0xFC
+@ data_end
+0x0

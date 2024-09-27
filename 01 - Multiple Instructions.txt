@@ -1,0 +1,16 @@
+## Multiple instructions
+# A test to see whether the processor can execute multiple instructions in sequence.
+
+# Append this after the language definition file in VCB.
+
+bookmark Code
+
+# interrupt vector (just resets, here)
+word start
+
+origin 0x0003 # program code starts at 0x0003.
+@ start
+MOV16 imm immp; word 0xFEFD; word 0x0101
+ADD imm imm immp; 0x19; 0x13; word 0x0101
+HLT
+

@@ -1,0 +1,18 @@
+bookmark Code
+## Conditional Jumps
+# A Test of conditional jumps.
+# This program inverts the A register, checking if it's zero. It should only jump once, then halt.
+
+# Append this after the language definition file in VCB.
+
+# interrupt vector
+word interrupt
+
+origin 0x0003 # program code starts at 0x0003.
+@ start
+MOV imm A; 0x00
+
+@ loop
+NOT A A
+JMP fnZ imm; word loop
+HLT
