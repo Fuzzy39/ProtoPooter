@@ -1,0 +1,40 @@
+# 04 - Interrupts
+# A test for interrupts.
+# The Virtual display should show a small moving pattern.
+# pressing a key set up with the virtual keyboard should trigger an interrupt.
+# Every time a key is pressed, another block of white will be displayed on the 
+# virual display.
+
+# Append this after the language definition file in VCB.
+
+bookmark Code
+
+# interrupt vector
+word interrupt
+
+origin 0x0003 # program code starts at 0x0003.
+
+# interrupt vector
+word interrupt
+
+origin 0x0003 # program code starts at 0x0003.
+symbol indicator 0x0101
+
+@ start
+MOV imm immp; 0xE4; word indicator
+MOV16 imm immp;  word 0x0121; word memPointer   
+SIE
+@ waitLoop
+RTL immp imm immp; word indicator; 0x02; word indicator
+JMP fnX imm; word waitLoop
+ 
+@ interrupt
+MOV16 immp AB; word memPointer
+MOV imm ABp; 0xFE;
+INC16 AB immp; word memPointer
+MOV imm immp; 0x00; word INT_REGISTER
+
+RIT fnX
+
+@ memPointer
+word 0x0000; 

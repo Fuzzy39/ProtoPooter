@@ -1,0 +1,141 @@
+bookmark Assembly Definition
+sub_bookmark Instruction Set
+
+# this defines the assembly language used for the Protopooter archetecture for use in VCB.
+
+## move instructions
+symbol iMOV    0x00
+symbol iMOV16  0x40
+
+## simple instructions
+symbol NOP     0x80
+symbol HLT     0x81
+symbol INT     0x82
+symbol RST     0x83
+symbol CIE     0x84
+symbol SIE     0x85
+symbol STX     0x86
+symbol CLX     0x87
+
+## Complex instructions
+# ALU unary
+symbol iINC    0x90
+symbol iINC16  0x92
+symbol iDEC    0x94
+symbol iNOT    0x96
+
+# ALU binary
+symbol iADD    0x98
+symbol iADD16  0x9A
+symbol iSUB    0x9C
+symbol iSUB16  0x9E
+symbol iCMP    0xA0
+symbol iAND    0xA2
+symbol iOR     0xA4
+symbol iXOR    0xA6
+symbol iSHL    0xA8
+symbol iSHR    0xAA
+symbol iRTL    0xAC
+symbol iRTR    0xAE
+
+# other complex
+symbol iJMP    0xB0
+symbol iJSR    0xB2
+symbol iLDF    0xB4
+
+symbol iSTI    0xB8
+symbol iSTI16  0xBA
+symbol iLDI    0xBC
+symbol iLDI16  0xBE
+
+## standard instructions
+symbol PUSH   0xC0
+symbol PUSH16 0xC8
+symbol POP    0xD0
+symbol POP16  0xD8
+symbol PEEK   0xE0
+symbol PEEK16 0xE8
+symbol RIT    0xF0
+symbol RSR    0xF8
+
+sub_bookmark Operands
+## LOC: 8-bit/16-bit location operands
+symbol A    0b000
+symbol AB   0b000
+
+symbol B    0b001
+symbol CD   0b001
+
+symbol C    0b010
+symbol SP   0b010
+
+symbol D    0b011
+# invalid for 16-bit
+
+symbol ABp  0b100 # would've prefered [AB] to represent indirection, oh well.
+symbol CDp  0b101
+symbol imm  0b110
+symbol immp 0b111
+
+## COND: Condition operands
+# would've prefered =X, !X, etc.
+symbol fX 0b000
+symbol fC 0b001
+symbol fZ 0b010
+symbol fN 0b011
+symbol fnX 0b100
+symbol fnC 0b101
+symbol fnZ 0b110
+symbol fnN 0b111
+
+sub_bookmark Instruction Macros
+# Woo, only 25 of these to write.
+# I mean, 2, basically, then just copy-paste.
+
+## Move instructions
+macro MOV   { iMOV | ( a? << 3 ) | b? }
+macro MOV16 { iMOV16 | ( a? << 3 ) | b? }
+
+
+## Complex instructions
+# ALU unary instructions
+macro INC   { iINC   | ( a? >> 2);  ((a? << 6) & 0xFF) | b?}
+macro INC16 { iINC16 | ( a? >> 2);  ((a? << 6) & 0xFF) | b?}
+macro DEC   { iDEC   | ( a? >> 2);  ((a? << 6) & 0xFF) | b?}
+macro NOT   { iNOT   | ( a? >> 2);  ((a? << 6) & 0xFF) | b?}
+
+# ALU binary instructions
+macro ADD   { iADD   | ( a? >> 2);  ((a? << 6) & 0xFF) | (b? << 3) | c? }
+macro ADD16 { iADD16 | ( a? >> 2);  ((a? << 6) & 0xFF) | (b? << 3) | c?}
+macro SUB   { iSUB   | ( a? >> 2);  ((a? << 6) & 0xFF) | (b? << 3) | c?}
+macro SUB16 { iSUB16 | ( a? >> 2);  ((a? << 6) & 0xFF) | (b? << 3) | c?}
+
+macro CMP   { iCMP | ( a? >> 2);  ((a? << 6) & 0xFF) | (b? << 3) }
+macro AND   { iAND | ( a? >> 2);  ((a? << 6) & 0xFF) | (b? << 3) | c?}
+macro OR    { iOR  | ( a? >> 2);  ((a? << 6) & 0xFF) | (b? << 3) | c?}
+macro XOR   { iXOR | ( a? >> 2);  ((a? << 6) & 0xFF) | (b? << 3) | c?}
+
+macro SHL   { iSHL | ( a? >> 2);  ((a? << 6) & 0xFF) | (b? << 3) | c?}
+macro SHR   { iSHR | ( a? >> 2);  ((a? << 6) & 0xFF) | (b? << 3) | c?}
+macro RTL   { iRTL | ( a? >> 2);  ((a? << 6) & 0xFF) | (b? << 3) | c?}
+macro RTR   { iRTR | ( a? >> 2);  ((a? << 6) & 0xFF) | (b? << 3) | c?}
+
+# Other complex instructions
+macro JMP   { iJMP | ( a? >> 2);  ((a? << 6) & 0xFF) | (b? << 3) }
+macro JSR   { iJSR | ( a? >> 2);  ((a? << 6) & 0xFF) | (b? << 3) }
+macro LDF   { iLDF | ( a? >> 2);  (a? << 6) & 0xFF }
+
+macro STI   { iSTI   | ( a? >> 2);  ((a? << 6) | (b? << 3) | c?) & 0xFF}
+macro STI16 { iSTI16 | ( a? >> 2);  ((a? << 6) | (b? << 3) | c?) & 0xFF}
+macro LDI   { iLDI   | ( a? >> 2);  ((a? << 6) | (b? << 3) | c?) & 0xFF}
+macro LDI16 { iLDI16 | ( a? >> 2);  ((a? << 6) | (b? << 3) | c?) & 0xFF}
+
+
+sub_bookmark Misc
+## Memory locations 
+symbol CODE_START   0x0003
+symbol INT_POINTER  0x0001
+symbol VMEM_POINTER 0xFFFD
+symbol INT_REGISTER 0xFFFF
+
+macro word {a? >> 8; a? & 0xFF }
