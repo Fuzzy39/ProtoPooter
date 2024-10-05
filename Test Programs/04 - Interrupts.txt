@@ -9,10 +9,6 @@
 
 bookmark Code
 
-# interrupt vector
-word interrupt
-
-origin 0x0003 # program code starts at 0x0003.
 
 # interrupt vector
 word interrupt
@@ -21,19 +17,23 @@ origin 0x0003 # program code starts at 0x0003.
 symbol indicator 0x0101
 
 @ start
+# Set up the indicator and pointer.
 MOV imm immp; 0xE4; word indicator
 MOV16 imm immp;  word 0x0121; word memPointer   
 SIE
+
 @ waitLoop
+# show a busy pattern while we wait for interrupts.
 RTL immp imm immp; word indicator; 0x02; word indicator
 JMP fnX imm; word waitLoop
  
 @ interrupt
+# add another block of white to the screen.
 MOV16 immp AB; word memPointer
 MOV imm ABp; 0xFE;
 INC16 AB immp; word memPointer
+# clear the interrupt register and return.
 MOV imm immp; 0x00; word INT_REGISTER
-
 RIT fnX
 
 @ memPointer

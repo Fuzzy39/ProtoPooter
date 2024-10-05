@@ -1,0 +1,24 @@
+bookmark Code
+
+
+# interrupt vector
+word interrupt
+
+origin 0x0003 # program code starts at 0x0003.
+
+
+@ start
+MOV16 imm CD; word 0x0000
+
+@ loop
+STI imm CD imm; word 0x0101; 0xFE
+INC16 CD CD
+CMP D imm; 0x05
+JMP fnZ imm; word loop
+HLT
+ 
+@ interrupt
+RIT fnX
+
+@ memPointer
+word 0x0000; 
