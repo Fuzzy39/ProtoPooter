@@ -1,0 +1,30 @@
+# Stack Peek
+# A test of simple test of the peek instruction
+# uses the stack to continuously increment numbers, filling
+# the screen.
+
+bookmark Code
+
+# interrupt vector
+word interrupt
+
+origin 0x0003 # program code starts at 0x0003.
+
+
+@ start
+MOV16 imm SP; word 0x0F00;
+PUSH imm;  0x00
+MOV imm B; 0x0E
+
+@ loop
+PEEK A
+INC A A
+PUSH A
+JMP fnZ imm; word loop
+DEC B B;
+JMP fnZ imm; word loop
+ 
+HLT
+
+@ interrupt
+HLT

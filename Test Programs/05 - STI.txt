@@ -1,6 +1,11 @@
+# 05 Simple STI test
+# This tests the STI16 instruction.
+# This should print an 8 pixel pattern 5 times, then halt.
+
+
+# Append this after the language definition file in VCB.
+
 bookmark Code
-
-
 # interrupt vector
 word interrupt
 
@@ -11,9 +16,9 @@ origin 0x0003 # program code starts at 0x0003.
 MOV16 imm CD; word 0x0000
 
 @ loop
-STI imm CD imm; word 0x0101; 0xFE
-INC16 CD CD
-CMP D imm; 0x05
+STI16 imm CD imm; word 0x0101; word 0xFEBF
+ADD16 CD imm CD; word 0x0002
+CMP D imm; 0x05 # note that we're just comparing D, since we know CD will not be greater than 0xFF.
 JMP fnZ imm; word loop
 HLT
  

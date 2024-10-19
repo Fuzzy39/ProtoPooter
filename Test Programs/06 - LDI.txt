@@ -1,0 +1,28 @@
+# 06 - LDI Test
+# This program tests LDI8 and LDI 16
+# a four pixel pattern should be printed twice, followed
+# by a different pixel pattern.
+
+# Append this after the language definition file in VCB.
+
+bookmark Code
+
+
+# interrupt vector
+word interrupt
+
+origin 0x0003 # program code starts at 0x0003.
+
+
+@ start
+LDI imm imm immp; word data; word 0x0001; word 0x0101 
+LDI16 imm imm immp; word data; word 0x0001; word 0x0102
+# this was simpler than I was anticipating.
+
+@ interrupt
+HLT
+
+@ data
+0x55 # dark grey, should not appear
+0xAB # light grey x3, white, should appear twice
+0x7E # dark grey, white x2, light grey, should appear once.

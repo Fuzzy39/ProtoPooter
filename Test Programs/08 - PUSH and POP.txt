@@ -1,0 +1,27 @@
+# Stack 8 bit
+# A test of simple test of PUSH and POP 
+# pushes a few numbers to the stack and pops one off
+# continously.
+bookmark Code
+
+# interrupt vector
+word interrupt
+
+origin 0x0003 # program code starts at 0x0003.
+
+
+@ start
+MOV16 imm SP; word 0x0110;
+PUSH imm; 0xFE
+PUSH imm; 0x00
+
+@ loop
+POP A
+INC A A
+PUSH A
+JMP fnZ imm; word loop
+ 
+HLT
+
+@ interrupt
+HLT

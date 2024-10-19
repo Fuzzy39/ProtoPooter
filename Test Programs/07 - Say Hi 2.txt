@@ -1,0 +1,93 @@
+# Say Hi 2
+# A further test of the LDI and STI instructions, and a very simple showcase of what the computer can do.
+# This will behave the same as Say Hi, then print hi again,
+# but with the colors inverted.
+
+# Append this after the language definition file in VCB.
+
+bookmark Code
+
+# interrupt vector
+word interrupt
+
+origin 0x0003 # program code starts at 0x0003.
+
+
+@ start
+# address to write to (minus a row)
+MOV16 imm CD; word 0x00E1 #(0x0101 - 0x20)
+MOV16 imm immp; word 0x000E; word data_counter
+
+@ loop
+# send CD to the next row
+ADD16 CD imm CD; word 0x0020
+
+# calculate the address to pull data from
+MOV16 imm AB; word data_end
+SUB16 AB immp AB; word data_counter
+
+# decrement the counter by two bytes
+SUB16 immp imm immp; word data_counter; word 0x0002 ; word data_counter
+
+# copy the data
+MOV16 ABp CDp
+
+JMP fnZ imm; word loop
+
+# because 8 pixels is two small to fit HI with 2 pixels
+# of horizontal margin, I will be doing something
+# slightly dumb
+
+MOV16 imm CD; word 0x0000
+MOV imm A; 0x07
+
+@ margin_loop
+STI imm CD imm; word 0x0103; 0x03 # add a strip of margin
+ADD16 CD imm CD; word 0x0020
+DEC A A
+JMP fnZ imm; word margin_loop
+
+
+# Now it's time to print again.
+MOV16 imm CD; word 0x0000
+MOV16 imm immp; word 0x0000; word data_counter
+
+@ loop2
+# copy over the original data
+LDI16 imm CD AB; word 0x0101
+# invert
+NOT A A
+NOT B B
+
+# display it beside the old data
+STI16 imm CD AB; word 0x0104
+
+# increment the counter and CD.
+INC16 immp immp; word data_counter; word data_counter
+ADD16 CD imm CD; word 0x0020
+
+CMP imm immp; 0x07; word data_counter_low_byte
+JMP fnZ imm; word loop2
+
+HLT
+
+@ interrupt
+HLT
+
+
+@ data_counter
+0x00
+@ data_counter_low_byte # because macros can't accept
+# expressions as inputs
+0x00
+
+@ data
+0x00; 0x00
+0xCC; 0xFC
+0xCC; 0x30
+0xFC; 0x30
+0xCC; 0x30
+0xCC; 0xFC
+0x00; 0x00
+@ data_end
+0x0
