@@ -1,11 +1,8 @@
-
-
-# 04 - Interrupts
-# A test for interrupts.
-# The Virtual display should show a small moving pattern.
-# pressing a key set up with the virtual keyboard should trigger an interrupt.
-# Every time a key is pressed, another block of white will be displayed on the 
-# virual display.
+# 10 - Subroutines
+# This program the JSR and RSR instructions, jump and return
+# to/from subroutine. The program contains a 'printSquare'
+# routine that prints a square on the screen. The main code
+# calls it twice.
 
 # Append this after the language definition file in VCB.
 
@@ -28,7 +25,7 @@ PUSH imm; 0xFF
 JSR fnX imm; word f_printSquare
 ADD16 SP imm SP; word 0x0003
 
-
+# Again, this time 
 PUSH16 imm; word 0x0112
 PUSH imm; 0x5A
 JSR fnX imm; word f_printSquare
@@ -51,13 +48,8 @@ ADD16 CD imm CD; word 0x0020
 DEC B B
 JMP fnZ imm; word printSquare_loop
 @ label
-JMP fnX imm; word label 
 RSR fnX
 
 
 @ interrupt
-# add another block of white to the screen.
 HLT
-
-@ memPointer
-word 0x0000; 
