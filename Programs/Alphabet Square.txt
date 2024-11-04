@@ -1,0 +1,55 @@
+
+bookmark Code
+
+# interrupt vector
+word interrupt
+
+origin 0x0003 # program code starts at 0x0003.
+
+
+@ start
+# Setup the stack pointer.
+MOV16 imm SP; word 0x0fff
+# and the VMEM_POINTER
+MOV16 imm immp; word 0x1000; word VMEM_POINTER
+
+#MOV imm A; 64
+#MOV imm C; 1
+#JSR fnX imm; word f_printChar
+#HLT
+
+MOV imm immp; 0; word y
+
+# outer loop
+@ outer_loop
+MOV imm immp; 0; word x
+
+@ inner_loop
+ADD immp immp C; word x; word y
+SHL immp imm A; word y; 4
+ADD A immp A; word x
+JSR fnX imm; word f_printChar
+
+#increment X
+INC immp immp; word x; word x
+CMP immp imm; word x; 16;
+JMP fnZ imm; word inner_loop
+
+# increment Y
+INC immp immp; word y; word y
+CMP immp imm; word y; 12;
+JMP fnZ imm; word outer_loop
+
+
+# We're done.
+HLT
+
+
+@ x
+0
+@ y
+0
+
+
+@ interrupt
+HLT

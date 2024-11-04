@@ -1,0 +1,42 @@
+# 11 CMP Test
+# This tests the CMP instruction.
+# The computer should halt, with the PC landing on the halt instruction after interrupt (having executed the one prior)
+# if it halts before, the CMP instruction did not behave as expected.
+
+
+# Append this after the language definition file in VCB.
+
+bookmark Code
+# interrupt vector
+word interrupt
+
+origin 0x0003 # program code starts at 0x0003.
+
+
+@ start
+CMP imm imm; 1; 1
+JMP fZ imm; word one
+HLT
+@ one
+CMP imm imm; 2; 1
+JMP fnZ imm; word two
+HLT
+@ two
+JMP fnN imm; word three
+HLT
+@ three
+
+CMP imm imm; 1; 2
+JMP fnZ imm; word four
+HLT
+@ four
+JMP fN imm; word five
+HLT
+@ five
+HLT
+
+
+
+
+@ interrupt
+HLT
