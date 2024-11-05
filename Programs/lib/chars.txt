@@ -1,0 +1,134 @@
+sub_bookmark display
+# for use as extra 'registers'
+@ spare_r1
+word 0
+@ spare_r2
+word 0
+
+@ f_printStr
+# prints a null terminated string
+# AB - pointer to start of string
+# C - inital character position
+# trashes everything
+MOV ABp D
+INC16 AB AB
+PUSH16 AB
+MOV C A
+MOV D C
+
+# Now Check for special cases
+CMP C imm; 0 # end of string
+JMP fnZ imm; word printStr_notEnd
+POP16 AB
+RSR fnX
+
+@ printStr_notEnd
+
+CMP C imm; 0x26 # newline
+JMP fnZ imm; word printStr_notNewline
+# advance A, do not print the character.
+AND A imm A; 0xF0
+ADD A imm A; 0x10
+# restore so looping can happen
+MOV A C
+POP16 AB
+JMP fnX imm; word f_printStr
+
+@ printStr_notNewline
+# prepare for normalcy
+PUSH A
+JSR fnX imm; word f_printChar
+POP C
+INC C C
+POP16 AB
+JMP fnX imm; word f_printStr
+
+@ f_printChar
+# prints a character at the specified location on the screen
+# A - index 0-192 (0xC0), errors on invalid
+# C - character 0-63, errors on invalid
+# trashes everything.
+CMP A imm; 192
+JMP fN imm; word printChar_okay
+STX
+@ printChar_okay
+PUSH C
+
+AND A imm B; 0x0F
+#SHR B imm B; 1
+PUSH B
+AND A imm B; 0xF0
+#SHL B imm B; 2
+
+# C contains the a number to add for the row
+# A * 5 is the number to add for the column
+MOV imm A; 10
+JSR fnX imm; word f_fmul8
+
+MOV imm A; 0
+POP B
+ADD16 AB CD CD
+# now we have the number to add to the vmem pointer
+# if I made a mistake in any of this I'll never figure it out
+MOV16 immp AB; word VMEM_POINTER
+ADD16 AB CD AB
+POP C
+JSR fnX imm; word f_printChar_offGrid
+RSR fnX
+
+
+
+@ f_printChar_offGrid
+# prints a character to the display at the
+# specified memory address
+# AB - address
+# C - character to print
+# errors out on invalid character.
+# trashes everything
+
+PUSH16 AB
+# check that character is valid.
+CMP C imm; 64
+JMP fN imm; word printChar_offGrid_okay
+STX
+@ printChar_offGrid_okay
+
+MOV C A
+# size of character data
+MOV imm B; 9
+JSR fnX imm; word f_fmul8
+
+ADD16 CD imm CD; word data_characters
+POP16 AB
+MOV imm immp; 0; word spare_r1
+
+# AB is location
+# CD is data
+# r1 is counter - we're writing 18 bytes.
+@ printChar_loop
+MOV CDp ABp
+INC immp immp; word spare_r1; word spare_r1
+INC16 CD CD;
+ADD16 AB imm AB; word 0x10
+CMP immp imm; word spare_r1; 9
+JMP fnZ imm; word printChar_loop
+
+# print one last line.
+MOV16 imm ABp; word 0
+RSR fnX
+
+
+
+@ f_clearScreen
+# clears the screen.
+# trashes everything.
+MOV16 immp AB; word VMEM_POINTER
+MOV16 imm CD; word 0x0100
+
+@ clearScreen_loop
+MOV16 imm ABp; word 0
+ADD16 AB imm AB; word 2
+SUB16 CD imm CD; word 2
+JMP fnZ imm; word clearScreen_loop
+RSR fnX
+

@@ -1,0 +1,33 @@
+
+sub_bookmark math
+@ f_fmul8
+# Fast 8 bit multiply
+# A, B - input
+# CD output
+# trashes everything
+
+# A should be smaller
+CMP A B
+JMP fN imm; word fmul8_start
+
+# swap A and B
+MOV A C
+MOV B A
+MOV C B
+
+@ fmul8_start
+MOV16 imm CD; word 0
+
+# stop early if multiplying by 0.
+CMP A imm; 0
+RSR fZ
+
+@ fmul8_loop
+ADD B D D
+JMP fnC imm; word fmul8_postcarry
+INC C C
+@ fmul8_postcarry
+DEC A A
+RSR fZ
+JMP fnX imm; word fmul8_loop
+
