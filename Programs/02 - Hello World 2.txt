@@ -1,0 +1,29 @@
+sub_bookmark f_main
+@ f_main # doesn't return because it's not a function, but oh well.
+
+
+
+# Hello, world!
+MOV16 imm AB; word str_hello
+JSR fnX imm; word f_cursorPrintStr
+
+JSR fnX imm; word f_cursorNewline
+JSR fnX imm; word f_cursorNewline
+
+# hex data! formatted, too!
+MOV imm C; 27
+MOV16 imm AB; word str_hello
+JSR fnX imm; word f_cursorPrintBytes
+
+HLT
+
+#MOV16 imm immp; word 0x0001; word VMEM_POINTER
+
+
+@ interrupt
+JMP fX imm; word f_onError
+JMP fnX imm; word f_int_unhandled
+HLT
+
+
+

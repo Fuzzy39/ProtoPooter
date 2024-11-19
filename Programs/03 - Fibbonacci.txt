@@ -1,0 +1,44 @@
+
+sub_bookmark f_main
+@ f_main # doesn't return because it's not a function, but oh well.
+
+JSR fnX imm; word f_clearScreen
+
+# Hello, world!
+MOV16 imm AB; word str_fib
+JSR fnX imm; word f_cursorPrintStr
+
+MOV imm A; 0x1
+PUSH A
+JSR fnX imm; word f_cursorPrintDec
+JSR fnX imm; word f_cursorNewline
+
+MOV imm A; 0x1
+PUSH A
+JSR fnX imm; word f_cursorPrintDec
+JSR fnX imm; word f_cursorNewline
+
+@ main_loop
+POP A
+POP B
+ADD A B B
+JMP fC imm; word main_end
+PUSH A
+PUSH B
+
+MOV B A
+JSR fnX imm; word f_cursorPrintDec
+JSR fnX imm; word f_cursorNewline
+JMP fnX imm; word main_loop
+
+@ main_end
+#MOV16 imm immp; word 0x0001; word VMEM_POINTER
+HLT
+
+
+@ interrupt
+JMP fX imm; word f_onError
+JMP fnX imm; word f_int_unhandled
+HLT
+
+
