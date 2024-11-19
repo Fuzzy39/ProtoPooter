@@ -1,0 +1,130 @@
+
+sub_bookmark f_printBytes
+@ f_printBytes
+# inputs: length of bytes 1, starting position 1, data pointer 2
+
+# A - Length in bytes of message
+# B - starting char position
+# CD - pointer to data
+# Destroys everything, including all spares.
+
+
+# The first goal is to calculate the number of bytes we can display from
+# the starting position, so we can error out if appropriate,
+# and so we can find the starting position within the line.
+
+MOV16 CD immp; word spare_r1
+MOV16 AB immp; word spare_r2
+
+# the maximum size for the string buffer is ((len/6)+1)*16 +1
+# in reality, it may be shorter than this. for ex. 1 byte may end up being
+# 3 long, but this code would have it be 17.
+
+MOV imm B; 6
+JSR fnX imm; word f_div8
+INC D D
+
+# now multiply by 16. Normally I'd use a bitshift but this could end up larger
+# than 256 characters.
+MOV D A
+MOV imm B; 16
+JSR fnX imm; word f_fmul8
+INC16 CD CD
+
+# CD now holds the amount we wish to buffer on the stack.
+SUB16 SP CD SP
+
+
+
+SUB16 SP imm SP; word 4
+STI16 SP imm CD; word 3
+
+# We have now allocated the string buffer.
+
+# move r1 to the stack.
+STI16 SP imm immp; word 1; word spare_r1
+
+## STACK VARS
+# SP+1: Data Pointer, 2b
+# SP+3: STRLEN, 2b
+# SP+5: STRING, STRLENb
+## spare vars 
+# r1: -- used by bytesToHex
+# r2: data len, screen starting pos. Data Pointer
+# r3: string pointer, 2b
+
+
+ADD16 SP imm immp; word 5; word spare_r3
+
+# OKAY! We always start on a new line.
+MOV immp A; word spare_r2 + 1
+AND A imm A; 0x0F
+JMP fZ imm; word printBytes_noNewline
+
+# Add a newline.
+STI immp imm imm; word spare_r3; word 0; 0x26
+INC16 immp immp; word spare_r3; word spare_r3
+
+
+@ printBytes_noNewline
+# We need a nested loop.
+# WWWW_WWWW_WWWW\n
+
+@ printBytes_innerLoop
+# Check how many bytes we have left to print.
+LDI immp imm A; word spare_r2; word 0
+CMP A imm; 1
+JMP fN imm; word printBytes_stringDone
+JMP fnZ imm; word printBytes_manyLeft
+
+PUSH imm; 1
+JMP fnX imm; word printBytes_callBytesToHex
+
+@ printBytes_manyLeft
+PUSH imm; 2
+
+# Prepare for calling bytesToHex.
+# note that we've pushed something on to the stack.
+@ printBytes_callBytesToHex
+LDI16 SP imm AB; word 2 # data pointer
+MOV16 immp CD; word spare_r3; # string pointer
+JSR fnX imm; word f_bytesToHex
+
+# Now we have a buttload of cleanup to do.
+# we need to reduce bytes to write, and increase
+# both string and data pointers.
+# and cleanup the stack.
+
+# string pointer
+MOV16 CD immp; word spare_r3; # the function is kind enough to do this for us.
+
+# bytes to write + stack
+MOV immp A; word spare_r2;
+POP B
+SUB A B immp; word spare_r2
+
+# data pointer
+INC16 SP CD
+MOV imm A; 0
+ADD16 CDp AB CDp
+
+# OKAY. Now we add a space.
+STI immp imm imm; word spare_r3; word 0; 0x25
+INC16 immp immp; word spare_r3; word spare_r3
+
+JMP fnX imm; word printBytes_innerLoop
+
+@ printBytes_stringDone
+
+# We just need to print the string and return
+ADD16 SP imm AB; word 5
+MOV immp C; word spare_r2 + 1
+JSR fnX imm; word f_printStr
+
+# Okay, returning is not so easy.
+LDI16 SP imm AB; word 3
+ADD16 AB imm AB; word 4
+ADD16 SP AB SP;
+RSR fnX
+
+
