@@ -1,0 +1,79 @@
+
+# Hello, world!
+MOV16 imm AB; word str_prime
+JSR fnX imm; word f_cursorPrintStr
+
+MOV imm A; 0x2
+PUSH A
+JSR fnX imm; word f_cursorPrintDec
+JSR fnX imm; word f_cursorNewline
+
+
+
+@ main_loop
+POP A
+INC A A
+JMP fC imm; word main_end
+PUSH A
+JSR fnX imm; word f_isPrime
+JMP fZ imm; word main_loop
+
+# it's prime!
+PEEK A
+JSR fnX imm; word f_cursorPrintDec
+JSR fnX imm; word f_cursorNewline
+
+JMP fnX imm; word main_loop
+
+@ main_end
+#MOV16 imm immp; word 0x0001; word VMEM_POINTER
+HLT
+
+
+
+
+
+
+
+
+
+sub_bookmark f_fmemCopy
+@ f_fmemCopy
+# Copies memory, so long as the amount to copy is even.
+# AB - source
+# CD - dest
+# stack (2 bytes) - len - consumed
+
+# sort out the stack
+LDI16 SP imm immp; word 3; word fmemCopy_spare
+POP16 immp; word fmemCopy_spare2
+ADD16 SP imm SP; word 2
+PUSH16 immp; word fmemCopy_spare2
+
+# check for evenness
+AND immp 1 immp; word fmemCopy_spare; word fmemCopy_spare2;
+JMP fZ imm; word fmemCopy_loop
+
+# error out
+MOV16 imm immp; word fstr_fmemCopy; word error_fName
+MOV16 imm immp; word estr_argument; word error_desc
+STX
+
+# this part needs to be fast
+@ fmemCopy_loop
+MOV16 ABp CDp
+ADD16 AB imm AB; word 2
+ADD16 CD imm CD; word 2
+SUB16 immp imm immp; word fmemCopy_spare; word 2; word fmemCopy_spare
+JMP fnZ imm; word fmemCopy_loop
+
+RSR fnX
+
+
+
+@ fmemCopy_spare
+word 0
+@ fmemCopy_spare2
+word 0
+
+
